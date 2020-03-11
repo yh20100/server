@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,42 +45,93 @@ namespace MaNGOS
         inline uint32 GetGrayLevel(uint32 pl_level)
         {
             if (pl_level <= 5)
-                { return 0; }
+            {
+                return 0;
+            }
             else if (pl_level <= 39)
-                { return pl_level - 5 - pl_level / 10; }
+            {
+                return pl_level - 5 - pl_level / 10;
+            }
             else if (pl_level <= 59)
+            {
                 return pl_level - 1 - pl_level / 5;
+            }
             else
+            {
                 return pl_level - 9;
+            }
         }
 
         inline XPColorChar GetColorCode(uint32 pl_level, uint32 mob_level)
         {
             if (mob_level >= pl_level + 5)
-                { return RED; }
+            {
+                return RED;
+            }
             else if (mob_level >= pl_level + 3)
-                { return ORANGE; }
+            {
+                return ORANGE;
+            }
             else if (mob_level >= pl_level - 2)
-                { return YELLOW; }
+            {
+                return YELLOW;
+            }
             else if (mob_level > GetGrayLevel(pl_level))
-                { return GREEN; }
+            {
+                return GREEN;
+            }
             else
-                { return GRAY; }
+            {
+                return GRAY;
+            }
         }
 
         inline uint32 GetZeroDifference(uint32 pl_level)
         {
-            if (pl_level < 8)  { return 5; }
-            if (pl_level < 10) { return 6; }
-            if (pl_level < 12) { return 7; }
-            if (pl_level < 16) { return 8; }
-            if (pl_level < 20) { return 9; }
-            if (pl_level < 30) { return 11; }
-            if (pl_level < 40) { return 12; }
-            if (pl_level < 45) { return 13; }
-            if (pl_level < 50) { return 14; }
-            if (pl_level < 55) { return 15; }
-            if (pl_level < 60) { return 16; }
+            if (pl_level < 8)
+            {
+                return 5;
+            }
+            if (pl_level < 10)
+            {
+                return 6;
+            }
+            if (pl_level < 12)
+            {
+                return 7;
+            }
+            if (pl_level < 16)
+            {
+                return 8;
+            }
+            if (pl_level < 20)
+            {
+                return 9;
+            }
+            if (pl_level < 30)
+            {
+                return 11;
+            }
+            if (pl_level < 40)
+            {
+                return 12;
+            }
+            if (pl_level < 45)
+            {
+                return 13;
+            }
+            if (pl_level < 50)
+            {
+                return 14;
+            }
+            if (pl_level < 55)
+            {
+                return 15;
+            }
+            if (pl_level < 60)
+            {
+                return 16;
+            }
             return 17;
         }
 
@@ -100,7 +151,9 @@ namespace MaNGOS
             {
                 uint32 nLevelDiff = mob_level - pl_level;
                 if (nLevelDiff > 4)
-                    { nLevelDiff = 4; }
+                {
+                    nLevelDiff = 4;
+                }
                 return ((pl_level * 5 + nBaseExp) * (20 + nLevelDiff) / 10 + 1) / 2;
             }
             else
@@ -124,10 +177,14 @@ namespace MaNGOS
 
             uint32 xp_gain = BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(pl->GetMapId(), pl->GetZoneId()));
             if (xp_gain == 0)
-                { return 0; }
+            {
+                return 0;
+            }
 
             if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsElite())
-                { xp_gain *= 2; }
+            {
+                xp_gain *= 2;
+            }
 
             return (uint32)(xp_gain * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL));
         }

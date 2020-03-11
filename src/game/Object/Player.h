@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,11 @@ class Spell;
 class Item;
 
 struct AreaTrigger;
+
+#ifdef ENABLE_PLAYERBOTS
+class PlayerbotAI;
+class PlayerbotMgr;
+#endif
 
 typedef std::deque<Mail*> PlayerMails;
 
@@ -203,7 +208,9 @@ struct ActionButton
         {
             packedData = newData;
             if (uState != ACTIONBUTTON_NEW)
-                { uState = ACTIONBUTTON_CHANGED; }
+            {
+                uState = ACTIONBUTTON_CHANGED;
+            }
         }
     }
 };
@@ -240,7 +247,10 @@ struct PlayerLevelInfo
 {
     PlayerLevelInfo()
     {
-        for (int i = 0; i < MAX_STATS; ++i) { stats[i] = 0; }
+        for (int i = 0; i < MAX_STATS; ++i)
+        {
+            stats[i] = 0;
+        }
     }
 
     uint8 stats[MAX_STATS];
@@ -347,7 +357,9 @@ struct LookingForGroup
     {
         for (int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
             if (slots[i].Is(_entry, _type))
+            {
                 return true;
+            }
         return false;
     }
 
@@ -355,7 +367,9 @@ struct LookingForGroup
     {
         for (int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
             if (slots[i].canAutoJoin())
+            {
                 return true;
+            }
         return false;
     }
 
@@ -363,7 +377,9 @@ struct LookingForGroup
     {
         for (int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
             if (!slots[i].Empty())
+            {
                 return false;
+            }
         return more.Empty();
     }
 
@@ -486,7 +502,7 @@ enum MirrorTimerType
 {
     FATIGUE_TIMER               = 0,
     BREATH_TIMER                = 1,
-    FIRE_TIMER                  = 2
+    FIRE_TIMER                  = 2     // probably mistake. More like to FEIGN_DEATH_TIMER
 };
 #define MAX_TIMERS              3
 #define DISABLED_MIRROR_TIMER   -1
@@ -810,7 +826,9 @@ class PlayerTaxi
                 return true;
             }
             else
-                { return false; }
+            {
+                return false;
+            }
         }
         void AppendTaximaskTo(ByteBuffer& data, bool all);
 
@@ -1050,8 +1068,14 @@ class Player : public Unit
         void SetGMVisible(bool on);
         void SetPvPDeath(bool on)
         {
-            if (on) { m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; }
-            else { m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
+            if (on)
+            {
+                m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH;
+            }
+            else
+            {
+                m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH;
+            }
         }
 
         // 0 = own auction, -1 = enemy auction, 1 = goblin auction
@@ -1064,9 +1088,13 @@ class Player : public Unit
             m_ExtraFlags &= ~(PLAYER_EXTRA_AUCTION_ENEMY | PLAYER_EXTRA_AUCTION_NEUTRAL);
 
             if (state < 0)
-                { m_ExtraFlags |= PLAYER_EXTRA_AUCTION_ENEMY; }
+            {
+                m_ExtraFlags |= PLAYER_EXTRA_AUCTION_ENEMY;
+            }
             else if (state > 0)
-                { m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL; }
+            {
+                m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL;
+            }
         }
 
 
@@ -1195,7 +1223,9 @@ class Player : public Unit
         InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap = false) const
         {
             if (!pItem)
-                { return EQUIP_ERR_ITEM_NOT_FOUND; }
+            {
+                return EQUIP_ERR_ITEM_NOT_FOUND;
+            }
             uint32 count = pItem->GetCount();
             return _CanStoreItem(bag, slot, dest, pItem->GetEntry(), count, pItem, swap, NULL);
         }
@@ -1291,7 +1321,7 @@ class Player : public Unit
             Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             return mainItem && mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON;
         }
-        void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false);
+        void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false, bool showInChat = true);
         bool BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot);
 
         float GetReputationPriceDiscount(Creature const* pCreature) const;
@@ -1452,6 +1482,9 @@ class Player : public Unit
         /*********************************************************/
 
         bool LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder);
+#ifdef ENABLE_PLAYERBOTS
+        bool MinimalLoadFromDB(QueryResult *result, uint32 guid);
+#endif
 
         static uint32 GetZoneIdFromDB(ObjectGuid guid);
         static uint32 GetLevelFromDB(ObjectGuid guid);
@@ -2106,7 +2139,9 @@ class Player : public Unit
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_NONE)
-                    { return true; }
+                {
+                    return true;
+                }
             return false;
         }
 
@@ -2115,14 +2150,18 @@ class Player : public Unit
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    { return i; }
+                {
+                    return i;
+                }
             return PLAYER_MAX_BATTLEGROUND_QUEUES;
         }
         bool IsInvitedForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId) const
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    { return m_bgBattleGroundQueueID[i].invitedToInstance != 0; }
+                {
+                    return m_bgBattleGroundQueueID[i].invitedToInstance != 0;
+                }
             return false;
         }
         bool InBattleGroundQueueForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId) const
@@ -2153,7 +2192,9 @@ class Player : public Unit
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == BATTLEGROUND_QUEUE_NONE)
-                    { return true; }
+                {
+                    return true;
+                }
             return false;
         }
         void RemoveBattleGroundQueueId(BattleGroundQueueTypeId val)
@@ -2172,13 +2213,17 @@ class Player : public Unit
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    { m_bgBattleGroundQueueID[i].invitedToInstance = instanceId; }
+                {
+                    m_bgBattleGroundQueueID[i].invitedToInstance = instanceId;
+                }
         }
         bool IsInvitedForBattleGroundInstance(uint32 instanceId) const
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].invitedToInstance == instanceId)
-                    { return true; }
+                {
+                    return true;
+                }
             return false;
         }
         WorldLocation const& GetBattleGroundEntryPoint() const { return m_bgData.joinPos; }
@@ -2605,7 +2650,9 @@ class Player : public Unit
         void ScheduleDelayedOperation(uint32 operation)
         {
             if (operation < DELAYED_END)
-                { m_DelayedOperations |= operation; }
+            {
+                m_DelayedOperations |= operation;
+            }
         }
 
         Unit* m_mover;
@@ -2614,6 +2661,10 @@ class Player : public Unit
         GridReference<Player> m_gridRef;
         MapReference m_mapRef;
 
+#ifdef ENABLE_PLAYERBOTS
+        PlayerbotAI* m_playerbotAI;
+        PlayerbotMgr* m_playerbotMgr;
+#endif
         // Homebind coordinates
         uint32 m_homebindMapId;
         uint16 m_homebindAreaId;
@@ -2662,7 +2713,10 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto);
 template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell const* spell)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
-    if (!spellInfo) { return 0; }
+    if (!spellInfo)
+    {
+        return 0;
+    }
     int32 totalpct = 0;
     int32 totalflat = 0;
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
@@ -2670,18 +2724,26 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
         SpellModifier* mod = *itr;
 
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
-            { continue; }
+        {
+            continue;
+        }
         if (mod->type == SPELLMOD_FLAT)
-            { totalflat += mod->value; }
+        {
+            totalflat += mod->value;
+        }
         else if (mod->type == SPELLMOD_PCT)
         {
             // skip percent mods for null basevalue (most important for spell mods with charges )
             if (basevalue == T(0))
-                { continue; }
+            {
+                continue;
+            }
 
             // special case (skip >10sec spell casts for instant cast setting)
             if (mod->op == SPELLMOD_CASTING_TIME  && basevalue >= T(10 * IN_MILLISECONDS) && mod->value <= -100)
-                { continue; }
+            {
+                continue;
+            }
 
             totalpct += mod->value;
         }
@@ -2689,7 +2751,9 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
         if (mod->charges > 0)
         {
             if (!spell)
-                { spell = FindCurrentSpellBySpellId(spellId); }
+            {
+                spell = FindCurrentSpellBySpellId(spellId);
+            }
 
             // avoid double use spellmod charge by same spell
             if (!mod->lastAffected || mod->lastAffected != spell)

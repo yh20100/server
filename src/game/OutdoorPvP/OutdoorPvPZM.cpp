@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,9 @@ OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
     m_towerMapState[1] = WORLD_STATE_ZM_BEACON_WEST_NEUTRAL;
 
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
+    {
         m_towerOwner[i] = TEAM_NONE;
+    }
 
     // initially set graveyard owner to neither faction
     sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID);
@@ -307,11 +309,15 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
             break;
         case GO_ZANGA_BANNER_CENTER_ALLIANCE:
             if (team == ALLIANCE || !player->HasAura(SPELL_BATTLE_STANDARD_HORDE))
+            {
                 return false;
+            }
             break;
         case GO_ZANGA_BANNER_CENTER_HORDE:
             if (team == HORDE || !player->HasAura(SPELL_BATTLE_STANDARD_ALLIANCE))
+            {
                 return false;
+            }
             break;
         default:
             return false;

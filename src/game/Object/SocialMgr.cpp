@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,17 +69,23 @@ bool PlayerSocial::AddToSocialList(ObjectGuid friend_guid, bool ignore)
     if (ignore)
     {
         if (GetNumberOfSocialsWithFlag(SOCIAL_FLAG_IGNORED) >= SOCIALMGR_IGNORE_LIMIT)
-            { return false; }
+        {
+            return false;
+        }
     }
     else
     {
         if (GetNumberOfSocialsWithFlag(SOCIAL_FLAG_FRIEND) >= SOCIALMGR_FRIEND_LIMIT)
-            { return false; }
+        {
+            return false;
+        }
     }
 
     uint32 flag = SOCIAL_FLAG_FRIEND;
     if (ignore)
-        { flag = SOCIAL_FLAG_IGNORED; }
+    {
+        flag = SOCIAL_FLAG_IGNORED;
+    }
 
     PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if (itr != m_playerSocialMap.end())
@@ -101,11 +107,15 @@ void PlayerSocial::RemoveFromSocialList(ObjectGuid friend_guid, bool ignore)
 {
     PlayerSocialMap::iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if (itr == m_playerSocialMap.end())                     // not exist
-        { return; }
+    {
+        return;
+    }
 
     uint32 flag = SOCIAL_FLAG_FRIEND;
     if (ignore)
-        { flag = SOCIAL_FLAG_IGNORED; }
+    {
+        flag = SOCIAL_FLAG_IGNORED;
+    }
 
     itr->second.Flags &= ~flag;
     if (itr->second.Flags == 0)
@@ -123,7 +133,9 @@ void PlayerSocial::SetFriendNote(ObjectGuid friend_guid, std::string note)
 {
     PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if (itr == m_playerSocialMap.end())                     // not exist
+    {
         return;
+    }
 
     utf8truncate(note, 48);                                 // DB and client size limitation
 
@@ -137,7 +149,9 @@ void PlayerSocial::SendSocialList()
 {
     Player* plr = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, m_playerLowGuid));
     if (!plr)
+    {
         return;
+    }
 
     uint32 size = m_playerSocialMap.size();
 
@@ -173,7 +187,9 @@ bool PlayerSocial::HasFriend(ObjectGuid friend_guid)
 {
     PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if (itr != m_playerSocialMap.end())
-        { return itr->second.Flags & SOCIAL_FLAG_FRIEND; }
+    {
+        return itr->second.Flags & SOCIAL_FLAG_FRIEND;
+    }
     return false;
 }
 
@@ -181,7 +197,9 @@ bool PlayerSocial::HasIgnore(ObjectGuid ignore_guid)
 {
     PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(ignore_guid.GetCounter());
     if (itr != m_playerSocialMap.end())
-        { return itr->second.Flags & SOCIAL_FLAG_IGNORED; }
+    {
+        return itr->second.Flags & SOCIAL_FLAG_IGNORED;
+    }
     return false;
 }
 
@@ -196,9 +214,11 @@ SocialMgr::~SocialMgr()
 void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo& friendInfo)
 {
     if (!player)
-        { return; }
+    {
+        return;
+    }
 
-    Player* pFriend = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, friend_lowguid));
+    Player* pFriend = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, friend_lowguid));
 
     Team team = player->GetTeam();
     AccountTypes security = player->GetSession()->GetSecurity();
@@ -207,6 +227,7 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo&
 
     PlayerSocialMap::iterator itr = player->GetSocial()->m_playerSocialMap.find(friend_lowguid);
     if (itr != player->GetSocial()->m_playerSocialMap.end())
+    {
         friendInfo.Note = itr->second.Note;
 
         // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
@@ -218,9 +239,13 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo&
         {
             friendInfo.Status = FRIEND_STATUS_ONLINE;
             if (pFriend->isAFK())
-                { friendInfo.Status = FRIEND_STATUS_AFK; }
+            {
+                friendInfo.Status = FRIEND_STATUS_AFK;
+            }
             if (pFriend->isDND())
-                { friendInfo.Status = FRIEND_STATUS_DND; }
+            {
+                friendInfo.Status = FRIEND_STATUS_DND;
+            }
             friendInfo.Area = pFriend->GetZoneId();
             friendInfo.Level = pFriend->getLevel();
             friendInfo.Class = pFriend->getClass();
@@ -232,6 +257,7 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo&
             friendInfo.Level = 0;
             friendInfo.Class = 0;
         }
+    }
 }
 
 void SocialMgr::MakeFriendStatusPacket(FriendsResult result, uint32 guid, WorldPacket* data)
@@ -274,15 +300,21 @@ void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, ObjectGui
     }
 
     if (broadcast)
-        { BroadcastToFriendListers(player, &data); }
+    {
+        BroadcastToFriendListers(player, &data);
+    }
     else
-        { player->GetSession()->SendPacket(&data); }
+    {
+        player->GetSession()->SendPacket(&data);
+    }
 }
 
 void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
 {
     if (!player)
-        { return; }
+    {
+        return;
+    }
 
     Team team = player->GetTeam();
     AccountTypes security = player->GetSession()->GetSecurity();
@@ -295,7 +327,7 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
         PlayerSocialMap::const_iterator itr2 = itr->second.m_playerSocialMap.find(guid);
         if (itr2 != itr->second.m_playerSocialMap.end() && (itr2->second.Flags & SOCIAL_FLAG_FRIEND))
         {
-            Player* pFriend = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* pFriend = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
             // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
             // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
@@ -316,11 +348,9 @@ PlayerSocial* SocialMgr::LoadFromDB(QueryResult* result, ObjectGuid guid)
     social->SetPlayerGuid(guid);
 
     if (!result)
-        { return social; }
-
-    uint32 friend_guid = 0;
-    uint32 flags = 0;
-    std::string note = "";
+    {
+        return social;
+    }
 
     // used to speed up check below. Using GetNumberOfSocialsWithFlag will cause unneeded iteration
     uint32 friendCounter = 0, ignoreCounter = 0;
@@ -329,21 +359,29 @@ PlayerSocial* SocialMgr::LoadFromDB(QueryResult* result, ObjectGuid guid)
     {
         Field* fields  = result->Fetch();
 
-        friend_guid = fields[0].GetUInt32();
-        flags = fields[1].GetUInt32();
-        note = fields[2].GetCppString();
+        uint32 friend_guid = fields[0].GetUInt32();
+        uint32 flags = fields[1].GetUInt32();
+        std::string note = fields[2].GetCppString();
 
         if ((flags & SOCIAL_FLAG_IGNORED) && ignoreCounter >= SOCIALMGR_IGNORE_LIMIT)
-            { continue; }
+        {
+            continue;
+        }
         if ((flags & SOCIAL_FLAG_FRIEND) && friendCounter >= SOCIALMGR_FRIEND_LIMIT)
-            { continue; }
+        {
+            continue;
+        }
 
         social->m_playerSocialMap[friend_guid] = FriendInfo(flags, note);
 
         if (flags & SOCIAL_FLAG_IGNORED)
-            { ++ignoreCounter; }
+        {
+            ++ignoreCounter;
+        }
         else
-            { ++friendCounter; }
+        {
+            ++friendCounter;
+        }
     }
     while (result->NextRow());
     delete result;

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -296,7 +296,9 @@ class Database
         inline bool DirectExecute(const char* sql)
         {
             if (!m_pAsyncConn)
-                { return false; }
+            {
+                return false;
+            }
 
             SqlConnection::Lock guard(m_pAsyncConn);
             return guard->Execute(sql);
@@ -623,7 +625,7 @@ class Database
         /**
         * @brief Function to check that the database version matches expected core version
         *
-        * @param DatabaseTypes 
+        * @param DatabaseTypes
         * @return bool
         */
         bool CheckDatabaseVersion(DatabaseTypes database);
@@ -656,9 +658,9 @@ class Database
          *
          */
         Database() :
-            m_nQueryConnPoolSize(1), m_pAsyncConn(NULL), m_pResultQueue(NULL),
+            m_TransStorage(NULL),m_nQueryConnPoolSize(1), m_pAsyncConn(NULL), m_pResultQueue(NULL),
             m_threadBody(NULL), m_delayThread(NULL), m_bAllowAsyncTransactions(false),
-            m_iStmtIndex(-1), m_logSQL(false), m_pingIntervallms(0), m_TransStorage(NULL)
+            m_iStmtIndex(-1), m_logSQL(false), m_pingIntervallms(0)
         {
             m_nQueryCounter = -1;
         }

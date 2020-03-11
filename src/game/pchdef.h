@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,17 +22,20 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-// add here most rarely modified headers to speed up debug build compilation
-#include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
-#include "Common.h"
+#ifndef GAME_PCH_H
+#define GAME_PCH_H
 
-#include "MapManager.h"
+#include "Common.h"
+#include "Map.h"
 #include "Log.h"
-#include "ObjectAccessor.h"
-#include "ObjectGuid.h"
-#include "SQLStorages.h"
-#include "Opcodes.h"
-#include "SharedDefines.h"
-#include "GuildMgr.h"
 #include "ObjectMgr.h"
-#include "ScriptMgr.h"
+#include "WorldPacket.h"
+#include "ObjectGuid.h"
+#include "WorldSession.h"
+#include "Creature.h"
+#include "Player.h"
+
+#include <map>
+#include <vector>
+
+#endif

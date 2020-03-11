@@ -1,8 +1,8 @@
-﻿/**
+/**
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,21 +46,21 @@ struct GameEventCreatureData;
 
 enum CreatureFlagsExtra
 {
-    CREATURE_EXTRA_FLAG_INSTANCE_BIND       = 0x00000001,       // creature kill bind instance with killer and killer's group
-    CREATURE_EXTRA_FLAG_NO_AGGRO            = 0x00000002,       // not aggro (ignore faction/reputation hostility)
-    CREATURE_EXTRA_FLAG_NO_PARRY            = 0x00000004,       // creature can't parry
-    CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN     = 0x00000008,       // creature can't counter-attack at parry
-    CREATURE_EXTRA_FLAG_NO_BLOCK            = 0x00000010,       // creature can't block
-    CREATURE_EXTRA_FLAG_NO_CRUSH            = 0x00000020,       // creature can't do crush attacks
-    CREATURE_EXTRA_FLAG_NO_XP_AT_KILL       = 0x00000040,       // creature kill not provide XP
-    CREATURE_EXTRA_FLAG_INVISIBLE           = 0x00000080,       // creature is always invisible for player (mostly trigger creatures)
-    CREATURE_EXTRA_FLAG_NOT_TAUNTABLE       = 0x00000100,       // creature is immune to taunt auras and effect attack me
-    CREATURE_EXTRA_FLAG_AGGRO_ZONE          = 0x00000200,       // creature sets itself in combat with zone on aggro
-    CREATURE_EXTRA_FLAG_GUARD               = 0x00000400,       // creature is a guard
-    CREATURE_EXTRA_FLAG_NO_CALL_ASSIST      = 0x00000800,       // creature shouldn't call for assistance on aggro
-    CREATURE_EXTRA_FLAG_ACTIVE              = 0x00001000,       // creature is active object. Grid of this creature will be loaded and creature set as active
-    CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE   = 0x00002000,       // creature is forced to use MMaps
-    CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE  = 0x00004000,       // creature is forced to NOT use MMaps
+    CREATURE_EXTRA_FLAG_INSTANCE_BIND          = 0x00000001,       // creature kill bind instance with killer and killer's group
+    CREATURE_EXTRA_FLAG_NO_AGGRO               = 0x00000002,       // not aggro (ignore faction/reputation hostility)
+    CREATURE_EXTRA_FLAG_NO_PARRY               = 0x00000004,       // creature can't parry
+    CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN        = 0x00000008,       // creature can't counter-attack at parry
+    CREATURE_EXTRA_FLAG_NO_BLOCK               = 0x00000010,       // creature can't block
+    CREATURE_EXTRA_FLAG_NO_CRUSH               = 0x00000020,       // creature can't do crush attacks
+    CREATURE_EXTRA_FLAG_NO_XP_AT_KILL          = 0x00000040,       // creature kill not provide XP
+    CREATURE_EXTRA_FLAG_INVISIBLE              = 0x00000080,       // creature is always invisible for player (mostly trigger creatures)
+    CREATURE_EXTRA_FLAG_NOT_TAUNTABLE          = 0x00000100,       // creature is immune to taunt auras and effect attack me
+    CREATURE_EXTRA_FLAG_AGGRO_ZONE             = 0x00000200,       // creature sets itself in combat with zone on aggro
+    CREATURE_EXTRA_FLAG_GUARD                  = 0x00000400,       // creature is a guard
+    CREATURE_EXTRA_FLAG_NO_CALL_ASSIST         = 0x00000800,       // creature shouldn't call for assistance on aggro
+    CREATURE_EXTRA_FLAG_ACTIVE                 = 0x00001000,       // creature is active object. Grid of this creature will be loaded and creature set as active
+    CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE      = 0x00002000,       // creature is forced to use MMaps
+    CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE     = 0x00004000,       // creature is forced to NOT use MMaps
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -71,8 +71,8 @@ enum CreatureFlagsExtra
 #endif
 
 #define MAX_KILL_CREDIT 2
-#define MAX_CREATURE_MODEL 4
-#define USE_DEFAULT_DATABASE_LEVEL  0                   // just used to show we don't want to force the new creature level and use the level stored in db
+#define MAX_CREATURE_MODEL 4                                // only single send to client in static data
+#define USE_DEFAULT_DATABASE_LEVEL  0                       // just used to show we don't want to force the new creature level and use the level stored in db
 
 // from `creature_template` table
 struct CreatureInfo
@@ -148,7 +148,6 @@ struct CreatureInfo
     uint32  EquipmentTemplateId;
     uint32  GossipMenuId;
     char const* AIName;
-    //uint32  ScriptID;
 
     // helpers
     static HighGuid GetHighGuid()
@@ -161,11 +160,17 @@ struct CreatureInfo
     SkillType GetRequiredLootSkill() const
     {
         if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
-            { return SKILL_HERBALISM; }
+        {
+            return SKILL_HERBALISM;
+        }
         else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
-            { return SKILL_MINING; }
+        {
+            return SKILL_MINING;
+        }
         else
-            { return SKILL_SKINNING; }                          // normal case
+        {
+            return SKILL_SKINNING; // normal case
+        }
     }
 
     bool isTameable() const
@@ -227,7 +232,10 @@ struct CreatureData
     uint8 spawnMask;
 
     // helper function
-    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(CreatureInfo::GetHighGuid(), id, lowguid); }
+    ObjectGuid GetObjectGuid(uint32 lowguid) const
+    {
+        return ObjectGuid(CreatureInfo::GetHighGuid(), id, lowguid);
+    }
 };
 
 enum SplineFlags
@@ -266,7 +274,7 @@ struct CreatureModelInfo
     float bounding_radius;
     float combat_reach;
     uint8 gender;
-    uint32 modelid_other_gender;                            // The oposite gender for this modelid (male/female)
+    uint32 modelid_other_gender;                            // The opposite gender for this modelid (male/female)
     uint32 modelid_alternative;                             // An alternative model. Generally same gender(2)
 };
 
@@ -367,7 +375,10 @@ struct VendorItemData
 
     VendorItem* GetItem(uint32 slot) const
     {
-        if (slot >= m_items.size()) { return NULL; }
+        if (slot >= m_items.size())
+        {
+            return NULL;
+        }
         return m_items[slot];
     }
     bool Empty() const { return m_items.empty(); }
@@ -383,7 +394,9 @@ struct VendorItemData
     void Clear()
     {
         for (VendorItemList::const_iterator itr = m_items.begin(); itr != m_items.end(); ++itr)
-            { delete(*itr); }
+        {
+            delete(*itr);
+        }
         m_items.clear();
     }
 };
@@ -564,7 +577,9 @@ class Creature : public Unit
         bool IsElite() const
         {
             if (IsPet())
-                { return false; }
+            {
+                return false;
+            }
 
             uint32 rank = GetCreatureInfo()->Rank;
             return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
@@ -573,7 +588,9 @@ class Creature : public Unit
         bool IsWorldBoss() const
         {
             if (IsPet())
-                { return false; }
+            {
+                return false;
+            }
 
             return GetCreatureInfo()->Rank == CREATURE_ELITE_WORLDBOSS;
         }
@@ -710,7 +727,7 @@ class Creature : public Unit
 
         /**
         * function indicating whether the recipient is a group.
-        * 
+        *
         * \return boolean true if the creature's recipient is a group, false otherwise.
         */
         bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }
@@ -797,9 +814,13 @@ class Creature : public Unit
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
         {
             if (pos >= CREATURE_MAX_SPELLS || m_charmInfo->GetCharmSpell(pos)->GetType() != ACT_ENABLED)
-                { return 0; }
+            {
+                return 0;
+            }
             else
-                { return m_charmInfo->GetCharmSpell(pos)->GetAction(); }
+            {
+                return m_charmInfo->GetCharmSpell(pos)->GetAction();
+            }
         }
 
         void SetCombatStartPosition(float x, float y, float z) { m_combatStartX = x; m_combatStartY = y; m_combatStartZ = z; }

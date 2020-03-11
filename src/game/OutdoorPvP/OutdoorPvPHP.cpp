@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,9 @@ OutdoorPvPHP::OutdoorPvPHP() : OutdoorPvP(),
     m_towerWorldState[2] = WORLD_STATE_HP_BROKEN_HILL_NEUTRAL;
 
     for (uint8 i = 0; i < MAX_HP_TOWERS; ++i)
+    {
         m_towerOwner[i] = TEAM_NONE;
+    }
 }
 
 void OutdoorPvPHP::FillInitialWorldStates(WorldPacket& data, uint32& count)
@@ -50,7 +52,9 @@ void OutdoorPvPHP::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, WORLD_STATE_HP_TOWER_DISPLAY_H, WORLD_STATE_ADD);
 
     for (uint8 i = 0; i < MAX_HP_TOWERS; ++i)
+    {
         FillInitialWorldState(data, count, m_towerWorldState[i], WORLD_STATE_ADD);
+    }
 }
 
 void OutdoorPvPHP::SendRemoveWorldStates(Player* player)
@@ -59,7 +63,9 @@ void OutdoorPvPHP::SendRemoveWorldStates(Player* player)
     player->SendUpdateWorldState(WORLD_STATE_HP_TOWER_DISPLAY_H, WORLD_STATE_REMOVE);
 
     for (uint8 i = 0; i < MAX_HP_TOWERS; ++i)
+    {
         player->SendUpdateWorldState(m_towerWorldState[i], WORLD_STATE_REMOVE);
+    }
 }
 
 void OutdoorPvPHP::HandlePlayerEnterZone(Player* player, bool isMainZone)

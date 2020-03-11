@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 // those generic events should get a high event id
 #define BG_EVENT_DOOR 254
 // only arena event
-// cause this buff apears 90sec after start in every bg i implement it here
+// cause this buff to appear 90secs after start in every bg i implement it here
 #define ARENA_BUFF_EVENT 253
 
 
@@ -119,7 +119,7 @@ enum BattleGroundSpells
     SPELL_HORDE_GREEN_FLAG          = 35775,
     SPELL_PREPARATION               = 44521,                // Preparation
     SPELL_RECENTLY_DROPPED_FLAG     = 42792,                // Recently Dropped Flag
-    SPELL_AURA_PLAYER_INACTIVE      = 43681                 // Inactive
+    SPELL_AURA_PLAYER_INACTIVE      = 43681,                // Inactive
 };
 
 enum BattleGroundTimeIntervals
@@ -641,9 +641,13 @@ class BattleGround
         uint32 GetInvitedCount(Team team) const
         {
             if (team == ALLIANCE)
-                { return m_InvitedAlliance; }
+            {
+                return m_InvitedAlliance;
+            }
             else
-                { return m_InvitedHorde; }
+            {
+                return m_InvitedHorde;
+            }
         }
         /**
          * @brief
@@ -1005,9 +1009,13 @@ class BattleGround
         void UpdatePlayersCountByTeam(Team team, bool remove)
         {
             if (remove)
-                { --m_PlayersCount[GetTeamIndexByTeamId(team)]; }
+            {
+                --m_PlayersCount[GetTeamIndexByTeamId(team)];
+            }
             else
-                { ++m_PlayersCount[GetTeamIndexByTeamId(team)]; }
+            {
+                ++m_PlayersCount[GetTeamIndexByTeamId(team)];
+            }
         }
 
         // used for rated arena battles
@@ -1025,7 +1033,7 @@ class BattleGround
          * @param
          * @param uint32
          */
-        virtual void HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) {}
+        virtual bool HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) { return false;  }
         // must be implemented in BG subclass if need AND call base class generic code
         /**
          * @brief
@@ -1163,7 +1171,9 @@ class BattleGround
         bool IsActiveEvent(uint8 event1, uint8 event2)
         {
             if (m_ActiveEvents.find(event1) == m_ActiveEvents.end())
-                { return false; }
+            {
+                return false;
+            }
             return m_ActiveEvents[event1] == event2;
         }
         /**
@@ -1370,7 +1380,6 @@ class BattleGround
 
         /* Arena team ids by team */
         uint32 m_ArenaTeamIds[PVP_TEAM_COUNT];
-
         int32 m_ArenaTeamRatingChanges[PVP_TEAM_COUNT];
 
         /* Limits */

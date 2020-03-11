@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,8 +159,30 @@ class BattleGroundQueue
          * @return bool
          */
         bool CheckPremadeMatch(BattleGroundBracketId bracket_id, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam);
+        /**
+         * @brief
+         *
+         * @param bg_template
+         * @param bracket_id
+         * @param minPlayers
+         * @param maxPlayers
+         * @return bool
+         */
         bool CheckNormalMatch(BattleGround* bg_template, BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
         bool CheckSkirmishForSameFaction(BattleGroundBracketId bracket_id, uint32 minPlayersPerTeam);
+        /**
+         * @brief
+         *
+         * @param leader
+         * @param group
+         * @param bgTypeId
+         * @param bracketId
+         * @return arenaType
+         * @return isRated
+         * @param isPremade
+         * @return ArenaRating
+         * @return ArenaTeam
+         */
         GroupQueueInfo* AddGroup(Player* leader, Group* group, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracketId, ArenaType arenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 ArenaTeamId = 0);
         /**
          * @brief
@@ -297,6 +319,15 @@ class BattleGroundQueue
 class BGQueueInviteEvent : public BasicEvent
 {
     public:
+        /**
+         * @brief
+         *
+         * @param pl_guid
+         * @param BgInstanceGUID
+         * @param BgTypeId
+         * @param arenaType
+         * @param removeTime
+         */
         BGQueueInviteEvent(ObjectGuid pl_guid, uint32 BgInstanceGUID, BattleGroundTypeId BgTypeId, ArenaType arenaType, uint32 removeTime) :
             m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_ArenaType(arenaType), m_RemoveTime(removeTime)
         {
@@ -450,6 +481,18 @@ class BattleGroundMgr
          * @param bg
          */
         void BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg);
+        /**
+         * @brief
+         *
+         * @param data
+         * @param bg
+         * @param QueueSlot
+         * @param StatusID
+         * @param Time1
+         * @param Time2
+         * @param arenaType
+         * @param arenaTeam
+         */
         void BuildBattleGroundStatusPacket(WorldPacket* data, BattleGround* bg, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, ArenaType arenatype, Team arenaTeam);
         /**
          * @brief
@@ -484,8 +527,38 @@ class BattleGroundMgr
          * @return BattleGround
          */
         BattleGround* GetBattleGroundTemplate(BattleGroundTypeId bgTypeId);
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @param bracket_id
+         * @return BattleGround
+         * @param arenaType
+         * @param isRated
+         */
         BattleGround* CreateNewBattleGround(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, ArenaType arenaType, bool isRated);
 
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @param IsArena
+         * @param MinPlayersPerTeam
+         * @param MaxPlayersPerTeam
+         * @param LevelMin
+         * @param LevelMax
+         * @param BattleGroundName
+         * @param MapID
+         * @param Team1StartLocX
+         * @param Team1StartLocY
+         * @param Team1StartLocZ
+         * @param Team1StartLocO
+         * @param Team2StartLocX
+         * @param Team2StartLocY
+         * @param Team2StartLocZ
+         * @param Team2StartLocO
+         * @return uint32
+         */
         uint32 CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsArena, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char const* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO);
 
         /**
@@ -549,6 +622,15 @@ class BattleGroundMgr
 
         BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPE_ID]; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param arenaRating
+         * @param arenaType
+         * @param bgQueueTypeId
+         * @param bgTypeId
+         * @param bracket_id
+         */
         void ScheduleQueueUpdate(uint32 arenaRating, ArenaType arenaType, BattleGroundQueueTypeId bgQueueTypeId, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id);
         uint32 GetMaxRatingDifference() const;
         uint32 GetRatingDiscardTimer()  const;
@@ -585,7 +667,9 @@ class BattleGroundMgr
         {
             BattleMastersMap::const_iterator itr = mBattleMastersMap.find(entry);
             if (itr != mBattleMastersMap.end())
-                { return itr->second; }
+            {
+                return itr->second;
+            }
             return BATTLEGROUND_TYPE_NONE;
         }
 
@@ -604,7 +688,9 @@ class BattleGroundMgr
         {
             CreatureBattleEventIndexesMap::const_iterator itr = m_CreatureBattleEventIndexMap.find(dbTableGuidLow);
             if (itr != m_CreatureBattleEventIndexMap.end())
-                { return itr->second; }
+            {
+                return itr->second;
+            }
             return m_CreatureBattleEventIndexMap.find(-1)->second;
         }
         /**
@@ -617,7 +703,9 @@ class BattleGroundMgr
         {
             GameObjectBattleEventIndexesMap::const_iterator itr = m_GameObjectBattleEventIndexMap.find(dbTableGuidLow);
             if (itr != m_GameObjectBattleEventIndexMap.end())
-                { return itr->second; }
+            {
+                return itr->second;
+            }
             return m_GameObjectBattleEventIndexMap.find(-1)->second;
         }
 
@@ -632,6 +720,14 @@ class BattleGroundMgr
 
         static bool IsArenaType(BattleGroundTypeId bgTypeId);
         static bool IsBattleGroundType(BattleGroundTypeId bgTypeId) { return !IsArenaType(bgTypeId); }
+
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @param arenaType
+         * @return BattleGroundQueueTypeId
+         */
         static BattleGroundQueueTypeId BGQueueTypeId(BattleGroundTypeId bgTypeId, ArenaType arenaType);
         /**
          * @brief

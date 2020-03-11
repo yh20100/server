@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,9 @@ void BattleGroundRL::AddPlayer(Player* plr)
 void BattleGroundRL::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 {
     if (GetStatus() == STATUS_WAIT_LEAVE)
+    {
         return;
+    }
 
     UpdateWorldState(0xbb8, GetAlivePlayersCountByTeam(ALLIANCE));
     UpdateWorldState(0xbb9, GetAlivePlayersCountByTeam(HORDE));
@@ -74,7 +76,9 @@ void BattleGroundRL::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 void BattleGroundRL::HandleKillPlayer(Player* player, Player* killer)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
+    {
         return;
+    }
 
     if (!killer)
     {
@@ -96,42 +100,9 @@ bool BattleGroundRL::HandlePlayerUnderMap(Player* player)
     return true;
 }
 
-void BattleGroundRL::HandleAreaTrigger(Player* source, uint32 trigger)
-{
-    // this is wrong way to implement these things. On official it done by gameobject spell cast.
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
-
-    // uint32 spellId = 0;
-    // uint64 buff_guid = 0;
-    switch (trigger)
-    {
-        case 4696:                                          // buff trigger?
-        case 4697:                                          // buff trigger?
-            break;
-        default:
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
-            source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);
-            break;
-    }
-
-    // if (buff_guid)
-    //    HandleTriggerBuff(buff_guid, source);
-}
-
 void BattleGroundRL::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
     FillInitialWorldState(data, count, 0xbb8, GetAlivePlayersCountByTeam(ALLIANCE));
     FillInitialWorldState(data, count, 0xbb9, GetAlivePlayersCountByTeam(HORDE));
     FillInitialWorldState(data, count, 0xbba, 1);
 }
-
-/*
-Packet S->C, id 600, SMSG_INIT_WORLD_STATES (706), len 86
-0000: 3C 02 00 00 80 0F 00 00 00 00 00 00 09 00 BA 0B | <...............
-0010: 00 00 01 00 00 00 B9 0B 00 00 02 00 00 00 B8 0B | ................
-0020: 00 00 00 00 00 00 D8 08 00 00 00 00 00 00 D7 08 | ................
-0030: 00 00 00 00 00 00 D6 08 00 00 00 00 00 00 D5 08 | ................
-0040: 00 00 00 00 00 00 D3 08 00 00 00 00 00 00 D4 08 | ................
-0050: 00 00 00 00 00 00                               | ......
-*/

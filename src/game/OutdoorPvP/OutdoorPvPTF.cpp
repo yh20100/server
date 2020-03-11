@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,9 @@ OutdoorPvPTF::OutdoorPvPTF() : OutdoorPvP(),
     m_towerWorldState[4] = WORLD_STATE_TF_SOUTH_TOWER_NEUTRAL;
 
     for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
+    {
         m_towerOwner[i] = TEAM_NONE;
+    }
 }
 
 void OutdoorPvPTF::FillInitialWorldStates(WorldPacket& data, uint32& count)
@@ -58,7 +60,9 @@ void OutdoorPvPTF::FillInitialWorldStates(WorldPacket& data, uint32& count)
         FillInitialWorldState(data, count, WORLD_STATE_TF_TOWER_COUNT_A, m_towersAlliance);
 
         for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
+        {
             FillInitialWorldState(data, count, m_towerWorldState[i], WORLD_STATE_ADD);
+        }
     }
     else
         UpdateTimerWorldState();
@@ -69,7 +73,9 @@ void OutdoorPvPTF::SendRemoveWorldStates(Player* player)
     player->SendUpdateWorldState(m_zoneWorldState, WORLD_STATE_REMOVE);
 
     for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
+    {
         player->SendUpdateWorldState(m_towerWorldState[i], WORLD_STATE_REMOVE);
+    }
 }
 
 void OutdoorPvPTF::HandlePlayerEnterZone(Player* player, bool isMainZone)
@@ -258,7 +264,9 @@ void OutdoorPvPTF::LockZone(GameObject* go, uint32 towerId, Team team, uint32 ne
 
     // remove tower states when zone has been captured and locked
     for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
+    {
         SendUpdateWorldState(m_towerWorldState[i], WORLD_STATE_REMOVE);
+    }
 
     m_towerWorldState[towerId] = newWorldState;
 }
@@ -283,7 +291,9 @@ void OutdoorPvPTF::UnlockZone()
     m_towerWorldState[3] = WORLD_STATE_TF_SOUTH_EAST_TOWER_NEUTRAL;
     m_towerWorldState[4] = WORLD_STATE_TF_SOUTH_TOWER_NEUTRAL;
     for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
+    {
         SendUpdateWorldState(m_towerWorldState[i], WORLD_STATE_ADD);
+    }
 
     // update tower count
     m_towersAlliance = 0;

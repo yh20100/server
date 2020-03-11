@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,9 @@ void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     SendTabardVendorActivate(guid);
 }
@@ -90,11 +92,15 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket& recv_data)
     recv_data >> guid;
 
     if (!CheckBanker(guid))
-        { return; }
+    {
+        return;
+    }
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     SendShowBank(guid);
 }
@@ -156,15 +162,21 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     // trainer list loaded at check;
     if (!unit->IsTrainerOf(_player, true))
-        { return; }
+    {
+        return;
+    }
 
     CreatureInfo const* ci = unit->GetCreatureInfo();
     if (!ci)
-        { return; }
+    {
+        return;
+    }
 
     TrainerSpellData const* cSpells = unit->GetTrainerSpells();
     TrainerSpellData const* tSpells = unit->GetTrainerTemplateSpells();
@@ -199,7 +211,9 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
 
             uint32 reqLevel = 0;
             if (!_player->IsSpellFitByClassAndRace(tSpell->spell, &reqLevel))
-                { continue; }
+            {
+                continue;
+            }
 
             reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
 
@@ -219,7 +233,9 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
 
             uint32 reqLevel = 0;
             if (!_player->IsSpellFitByClassAndRace(tSpell->spell, &reqLevel))
-                { continue; }
+            {
+                continue;
+            }
 
             reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
 
@@ -254,44 +270,60 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     if (!unit->IsTrainerOf(_player, true))
-        { return; }
+    {
+        return;
+    }
 
     // check present spell in trainer spell list
     TrainerSpellData const* cSpells = unit->GetTrainerSpells();
     TrainerSpellData const* tSpells = unit->GetTrainerTemplateSpells();
 
     if (!cSpells && !tSpells)
-        { return; }
+    {
+        return;
+    }
 
     // Try find spell in npc_trainer
     TrainerSpell const* trainer_spell = cSpells ? cSpells->Find(spellId) : NULL;
 
     // Not found, try find in npc_trainer_template
     if (!trainer_spell && tSpells)
-        { trainer_spell = tSpells->Find(spellId); }
+    {
+        trainer_spell = tSpells->Find(spellId);
+    }
 
     // Not found anywhere, cheating?
     if (!trainer_spell)
-        { return; }
+    {
+        return;
+    }
 
     // can't be learn, cheat? Or double learn with lags...
     uint32 reqLevel = 0;
     if (!_player->IsSpellFitByClassAndRace(trainer_spell->spell, &reqLevel))
-        { return; }
+    {
+        return;
+    }
 
     reqLevel = trainer_spell->isProvidedReqLevel ? trainer_spell->reqLevel : std::max(reqLevel, trainer_spell->reqLevel);
     if (_player->GetTrainerSpellState(trainer_spell, reqLevel) != TRAINER_SPELL_GREEN)
-        { return; }
+    {
+        return;
+    }
 
     // apply reputation discount
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
 
     // check money requirement
     if (_player->GetMoney() < nSpellCost)
-        { return; }
+    {
+        return;
+    }
 
     _player->ModifyMoney(-int32(nSpellCost));
 
@@ -327,12 +359,16 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     pCreature->StopMoving();
 
     if (pCreature->IsSpiritGuide())
-        { pCreature->SendAreaSpiritHealerQueryOpcode(_player); }
+    {
+        pCreature->SendAreaSpiritHealerQueryOpcode(_player);
+    }
 
     if (!sScriptMgr.OnGossipHello(_player, pCreature))
     {
@@ -360,7 +396,9 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     uint32 sender = _player->PlayerTalkClass->GossipOptionSender(gossipListId);
     uint32 action = _player->PlayerTalkClass->GossipOptionAction(gossipListId);
@@ -437,7 +475,9 @@ void WorldSession::HandleSpiritHealerActivateOpcode(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     SendSpiritResurrect();
 }
@@ -465,7 +505,9 @@ void WorldSession::SendSpiritResurrect()
                 _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetMapId(), _player->GetTeam());
 
         if (corpseGrave != ghostGrave)
-            { _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation()); }
+        {
+            _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
+        }
         // or update at original position
         else
         {
@@ -487,7 +529,9 @@ void WorldSession::HandleBinderActivateOpcode(WorldPacket& recv_data)
     recv_data >> npcGuid;
 
     if (!GetPlayer()->IsInWorld() || !GetPlayer()->IsAlive())
-        { return; }
+    {
+        return;
+    }
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_INNKEEPER);
     if (!unit)
@@ -498,7 +542,9 @@ void WorldSession::HandleBinderActivateOpcode(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     SendBindPoint(unit);
 }
@@ -507,7 +553,9 @@ void WorldSession::SendBindPoint(Creature* npc)
 {
     // prevent set homebind to instances in any case
     if (GetPlayer()->GetMap()->Instanceable())
-        { return; }
+    {
+        return;
+    }
 
     // send spell for bind 3286 bind magic
     npc->CastSpell(_player, 3286, true);                    // Bind
@@ -536,7 +584,9 @@ void WorldSession::HandleListStabledPetsOpcode(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     SendStablePet(npcGUID);
 }
@@ -650,7 +700,9 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     Pet* pet = _player->GetPet();
 
@@ -675,7 +727,9 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
 
             // slots ordered in query, and if not equal then free
             if (slot != free_slot)
-                { break; }
+            {
+                break;
+            }
 
             // this slot not free, skip
             ++free_slot;
@@ -691,7 +745,9 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
         SendStableResult(STABLE_SUCCESS_STABLE);
     }
     else
-        { SendStableResult(STABLE_ERR_STABLE); }
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+    }
 }
 
 void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
@@ -710,7 +766,9 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     uint32 creature_id = 0;
 
@@ -747,7 +805,9 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
 
     // delete dead pet
     if (pet)
-        { pet->Unsummon(PET_SAVE_AS_DELETED, _player); }
+    {
+        pet->Unsummon(PET_SAVE_AS_DELETED, _player);
+    }
 
     Pet* newpet = new Pet(HUNTER_PET);
     if (!newpet->LoadPetFromDB(_player, creature_id, petnumber))
@@ -776,7 +836,9 @@ void WorldSession::HandleBuyStableSlot(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     if (GetPlayer()->m_stableSlots < MAX_PET_STABLES)
     {
@@ -788,10 +850,14 @@ void WorldSession::HandleBuyStableSlot(WorldPacket& recv_data)
             SendStableResult(STABLE_SUCCESS_BUY_SLOT);
         }
         else
-            { SendStableResult(STABLE_ERR_MONEY); }
+        {
+            SendStableResult(STABLE_ERR_MONEY);
+        }
     }
     else
-        { SendStableResult(STABLE_ERR_STABLE); }
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+    }
 }
 
 void WorldSession::HandleStableRevivePet(WorldPacket& /* recv_data */)
@@ -815,7 +881,9 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
 
     Pet* pet = _player->GetPet();
@@ -865,7 +933,9 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
         SendStableResult(STABLE_ERR_STABLE);
     }
     else
-        { SendStableResult(STABLE_SUCCESS_UNSTABLE); }
+    {
+        SendStableResult(STABLE_SUCCESS_UNSTABLE);
+    }
 }
 
 void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
@@ -887,7 +957,9 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     // reputation discount
     float discountMod = _player->GetReputationPriceDiscount(unit);
@@ -912,10 +984,14 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
     {
         uint32 GuildId = _player->GetGuildId();
         if (!GuildId)
+        {
             return;
+        }
         Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
         if (!pGuild)
+        {
             return;
+        }
         pGuild->LogBankEvent(GUILD_BANK_LOG_REPAIR_MONEY, 0, _player->GetGUIDLow(), TotalCost);
         pGuild->SendMoneyInfo(this, _player->GetGUIDLow());
     }

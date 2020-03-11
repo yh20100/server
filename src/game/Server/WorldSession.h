@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -221,7 +221,7 @@ class WorldSession
         uint8 Expansion() const { return m_expansion; }
 
         // Warden
-        void InitWarden(BigNumber* k, std::string const& os);
+        void InitWarden(uint16 build, BigNumber* k, std::string const& os);
 
         /// Session in auth.queue currently
         void SetInQueue(bool state)
@@ -303,7 +303,9 @@ class WorldSession
             {
                 m_Tutorials[intId] = value;
                 if (m_tutorialState == TUTORIALDATA_UNCHANGED)
-                    { m_tutorialState = TUTORIALDATA_CHANGED; }
+                {
+                    m_tutorialState = TUTORIALDATA_CHANGED;
+                }
             }
         }
 
@@ -444,7 +446,7 @@ class WorldSession
         void HandleLogoutRequestOpcode(WorldPacket& recvPacket);
         void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
         void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
-        
+
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
         void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
@@ -795,6 +797,13 @@ class WorldSession
         void HandleSetActiveVoiceChannel(WorldPacket& recv_data);
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
+#ifdef ENABLE_PLAYERBOTS
+        void HandleBotPackets();
+#endif
+
+        // for Warden
+        uint16 GetClientBuild() const { return _build; }
+
         // Guild Bank
         void HandleGuildPermissions(WorldPacket& recv_data);
         void HandleGuildBankMoneyWithdrawn(WorldPacket& recv_data);
@@ -833,6 +842,7 @@ class WorldSession
 
         // Warden
         Warden* _warden;                                    // Remains NULL if Warden system is not enabled by config
+        uint16 _build;                                      // connected client build
 
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue

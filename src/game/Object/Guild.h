@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ enum Typecommand
 
 enum CommandErrors
 {
-    ERR_PLAYER_NO_MORE_IN_GUILD     = 0x00,
+    ERR_PLAYER_NO_MORE_IN_GUILD     = 0x00, // no message/error
     ERR_GUILD_INTERNAL              = 0x01,
     ERR_ALREADY_IN_GUILD            = 0x02,
     ERR_ALREADY_IN_GUILD_S          = 0x03,
@@ -94,8 +94,8 @@ enum CommandErrors
     ERR_ALREADY_INVITED_TO_GUILD_S  = 0x05,
     ERR_GUILD_NAME_INVALID          = 0x06,
     ERR_GUILD_NAME_EXISTS_S         = 0x07,
-    ERR_GUILD_LEADER_LEAVE          = 0x08,
-    ERR_GUILD_PERMISSIONS           = 0x08,
+    ERR_GUILD_LEADER_LEAVE          = 0x08, // for Typecommand 0x03
+    ERR_GUILD_PERMISSIONS           = 0x08, // for another Typecommand
     ERR_GUILD_PLAYER_NOT_IN_GUILD   = 0x09,
     ERR_GUILD_PLAYER_NOT_IN_GUILD_S = 0x0A,
     ERR_GUILD_PLAYER_NOT_FOUND_S    = 0x0B,
@@ -361,9 +361,11 @@ class Guild
         void BroadcastWorker(Do& _do, Player* except = NULL)
         {
             for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-                if (Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
+                if (Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
                     if (player != except)
-                        { _do(player); }
+                    {
+                        _do(player);
+                    }
         }
 
         void CreateRank(std::string name, uint32 rights);
@@ -395,7 +397,9 @@ class Guild
         {
             for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
                 if (itr->second.Name == name)
-                    { return &itr->second; }
+                {
+                    return &itr->second;
+                }
 
             return NULL;
         }

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,9 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
     recvPacket >> gname;
 
     if (GetPlayer()->GetGuildId())                          // already in guild
-        { return; }
+    {
+        return;
+    }
 
     Guild* guild = new Guild;
     if (!guild->Create(GetPlayer(), gname))
@@ -93,7 +95,9 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     recvPacket >> Invitedname;
 
     if (normalizePlayerName(Invitedname))
-        { player = ObjectAccessor::FindPlayerByName(Invitedname.c_str()); }
+    {
+        player = sObjectAccessor.FindPlayerByName(Invitedname.c_str());
+    }
 
     if (!player)
     {
@@ -110,7 +114,9 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     // OK result but not send invite
     if (player->GetSocial()->HasIgnore(GetPlayer()->GetObjectGuid()))
-        { return; }
+    {
+        return;
+    }
 
     // not let enemies sign guild charter
     if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD) && player->GetTeam() != GetPlayer()->GetTeam())
@@ -161,7 +167,9 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
     recvPacket >> plName;
 
     if (!normalizePlayerName(plName))
-        { return; }
+    {
+        return;
+    }
 
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
     if (!guild)
@@ -219,14 +227,20 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
 
     guild = sGuildMgr.GetGuildById(player->GetGuildIdInvited());
     if (!guild || player->GetGuildId())
-        { return; }
+    {
+        return;
+    }
 
     // not let enemies sign guild charter
     if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD) && player->GetTeam() != sObjectMgr.GetPlayerTeamByGUID(guild->GetLeaderGuid()))
-        { return; }
+    {
+        return;
+    }
 
     if (!guild->AddMember(GetPlayer()->GetObjectGuid(), guild->GetLowestRank()))
-        { return; }
+    {
+        return;
+    }
     // Put record into guild log
     guild->LogGuildEvent(GUILD_EVENT_LOG_JOIN_GUILD, GetPlayer()->GetObjectGuid());
 
@@ -267,7 +281,9 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& /*recvPacket*/)
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_ROSTER");
 
     if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
-        { guild->Roster(this); }
+    {
+        guild->Roster(this);
+    }
 }
 
 void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
@@ -278,7 +294,9 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     recvPacket >> plName;
 
     if (!normalizePlayerName(plName))
-        { return; }
+    {
+        return;
+    }
 
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
     if (!guild)
@@ -331,7 +349,9 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
     recvPacket >> plName;
 
     if (!normalizePlayerName(plName))
-        { return; }
+    {
+        return;
+    }
 
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
 
@@ -456,7 +476,9 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     Player* oldLeader = GetPlayer();
 
     if (!normalizePlayerName(name))
-        { return; }
+    {
+        return;
+    }
 
     Guild* guild = sGuildMgr.GetGuildById(oldLeader->GetGuildId());
 
@@ -499,9 +521,13 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
     std::string MOTD;
 
     if (!recvPacket.empty())
-        { recvPacket >> MOTD; }
+    {
+        recvPacket >> MOTD;
+    }
     else
-        { MOTD.clear(); }
+    {
+        MOTD.clear();
+    }
 
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
     if (!guild)
@@ -528,7 +554,9 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
     recvPacket >> name;
 
     if (!normalizePlayerName(name))
-        { return; }
+    {
+        return;
+    }
 
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
 
@@ -566,7 +594,9 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
     recvPacket >> plName;
 
     if (!normalizePlayerName(plName))
-        { return; }
+    {
+        return;
+    }
 
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
 
@@ -639,7 +669,9 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     guild->SetRankName(rankId, rankname);
 
     if (rankId == GR_GUILDMASTER)                           // prevent loss leader rights
-        { rights = GR_RIGHT_ALL; }
+    {
+        rights = GR_RIGHT_ALL;
+    }
 
     guild->SetRankRights(rankId, rights);
 
@@ -668,7 +700,9 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
     }
 
     if (guild->GetRanksSize() >= GUILD_RANKS_MAX_COUNT)     // client not let create more 10 than ranks
-        { return; }
+    {
+        return;
+    }
 
     guild->CreateRank(rankname, GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 
@@ -754,7 +788,9 @@ void WorldSession::HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket)
 
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
     if (!guild)
@@ -794,7 +830,9 @@ void WorldSession::HandleGuildEventLogQueryOpcode(WorldPacket& /* recvPacket */)
 
     if (uint32 GuildId = GetPlayer()->GetGuildId())
         if (Guild* pGuild = sGuildMgr.GetGuildById(GuildId))
-            { pGuild->DisplayGuildEventLog(this); }
+        {
+            pGuild->DisplayGuildEventLog(this);
+        }
 }
 
 /******  GUILD BANK  *******/
@@ -846,7 +884,9 @@ void WorldSession::HandleGuildBankerActivate(WorldPacket& recv_data)
     recv_data >> goGuid >> unk;
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     if (uint32 GuildId = GetPlayer()->GetGuildId())
     {
@@ -870,18 +910,26 @@ void WorldSession::HandleGuildBankQueryTab(WorldPacket& recv_data)
     recv_data >> goGuid >> TabId >> unk1;
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (TabId >= pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     // Let's update the amount of gold the player can withdraw before displaying the content
     // This is useful if money withdraw right has changed
@@ -898,24 +946,36 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPacket& recv_data)
     recv_data >> goGuid >> money;
 
     if (!money)
+    {
         return;
+    }
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     if (GetPlayer()->GetMoney() < money)
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (!pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     CharacterDatabase.BeginTransaction();
 
@@ -949,27 +1009,41 @@ void WorldSession::HandleGuildBankWithdrawMoney(WorldPacket& recv_data)
     recv_data >> goGuid >> money;
 
     if (!money)
+    {
         return;
+    }
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (GuildId == 0)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (!pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     if (pGuild->GetGuildBankMoney() < money)                // not enough money in bank
+    {
         return;
+    }
 
     if (!pGuild->HasRankRight(GetPlayer()->GetRank(), GR_RIGHT_WITHDRAW_GOLD))
+    {
         return;
+    }
 
     CharacterDatabase.BeginTransaction();
 
@@ -1074,7 +1148,9 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
     }
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     // Bank <-> Bank
     if (BankToBank)
@@ -1110,26 +1186,38 @@ void WorldSession::HandleGuildBankBuyTab(WorldPacket& recv_data)
     recv_data >> TabId;
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     // m_PurchasedTabs = 0 when buying Tab 0, that is why this check can be made
     if (TabId != pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     uint32 TabCost = GetGuildBankTabPrice(TabId) * GOLD;
     if (!TabCost)
+    {
         return;
+    }
 
     if (GetPlayer()->GetMoney() < TabCost)                  // Should not happen, this is checked by client
+    {
         return;
+    }
 
     // Go on with creating tab
     pGuild->CreateNewBankTab();
@@ -1154,24 +1242,36 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recv_data)
     recv_data >> IconIndex;
 
     if (Name.empty())
+    {
         return;
+    }
 
     if (IconIndex.empty())
+    {
         return;
+    }
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (TabId >= pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     pGuild->SetGuildBankTabInfo(TabId, Name, IconIndex);
     pGuild->DisplayGuildBankTabsInfo(this);
@@ -1187,15 +1287,21 @@ void WorldSession::HandleGuildBankLogQuery(WorldPacket& recv_data)
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     // GUILD_BANK_MAX_TABS send by client for money log
     if (TabId >= pGuild->GetPurchasedTabs() && TabId != GUILD_BANK_MAX_TABS)
+    {
         return;
+    }
 
     pGuild->DisplayGuildBankLogs(this, TabId);
 }
@@ -1209,14 +1315,20 @@ void WorldSession::HandleQueryGuildBankTabText(WorldPacket& recv_data)
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (TabId >= pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     pGuild->SendGuildBankTabText(this, TabId);
 }
@@ -1232,14 +1344,20 @@ void WorldSession::HandleSetGuildBankTabText(WorldPacket& recv_data)
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (TabId >= pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     pGuild->SetGuildBankTabText(TabId, Text);
 }

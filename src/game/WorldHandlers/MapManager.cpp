@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,10 +46,14 @@ MapManager::MapManager()
 MapManager::~MapManager()
 {
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        { delete iter->second; }
+    {
+        delete iter->second;
+    }
 
     for (TransportSet::iterator i = m_Transports.begin(); i != m_Transports.end(); ++i)
-        { delete *i; }
+    {
+        delete *i;
+    }
 
     DeleteStateMachine();
 }
@@ -60,7 +64,9 @@ MapManager::Initialize()
     int num_threads(sWorld.getConfig(CONFIG_UINT32_NUMTHREADS));
 
     if (num_threads > 0 && m_updater.activate(num_threads) == -1)
-      {  abort(); }
+    {
+        abort();
+    }
 
     InitStateMachine();
     InitMaxInstanceId();
@@ -94,7 +100,9 @@ void MapManager::UpdateGridState(grid_state_t state, Map& map, NGridType& ngrid,
 void MapManager::InitializeVisibilityDistanceInfo()
 {
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        { (*iter).second->InitVisibilityDistance(); }
+    {
+        (*iter).second->InitVisibilityDistance();
+    }
 }
 
 /// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
@@ -106,7 +114,9 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 
     const MapEntry* entry = sMapStore.LookupEntry(id);
     if (!entry)
-        { return NULL; }
+    {
+        return NULL;
+    }
 
     if (entry->Instanceable())
     {
@@ -148,7 +158,9 @@ Map* MapManager::FindMap(uint32 mapid, uint32 instanceId) const
 
     MapMapType::const_iterator iter = i_maps.find(MapID(mapid, instanceId));
     if (iter == i_maps.end())
-        { return NULL; }
+    {
+        return NULL;
+    }
 
     // this is a small workaround for transports
     if (instanceId == 0 && iter->second->Instanceable())
@@ -182,18 +194,26 @@ void MapManager::Update(uint32 diff)
 {
     i_timer.Update(diff);
     if (!i_timer.Passed())
-        { return; }
+    {
+        return;
+    }
 
     for (MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
     {
         if (m_updater.activated())
-          {  m_updater.schedule_update(*iter->second, (uint32)i_timer.GetCurrent()); }
+        {
+            m_updater.schedule_update(*iter->second, (uint32)i_timer.GetCurrent());
+        }
         else
-          { iter->second->Update((uint32)i_timer.GetCurrent()); }
+        {
+            iter->second->Update((uint32)i_timer.GetCurrent());
+        }
     }
 
     if (m_updater.activated())
-      {  m_updater.wait(); }
+    {
+        m_updater.wait();
+    }
 
     for (TransportSet::iterator iter = m_Transports.begin(); iter != m_Transports.end(); ++iter)
     {
@@ -215,7 +235,9 @@ void MapManager::Update(uint32 diff)
             i_maps.erase(iter++);
         }
         else
-            { ++iter; }
+        {
+            ++iter;
+        }
     }
 
     i_timer.SetCurrent(0);
@@ -224,7 +246,9 @@ void MapManager::Update(uint32 diff)
 void MapManager::RemoveAllObjectsInRemoveList()
 {
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        { iter->second->RemoveAllObjectsInRemoveList(); }
+    {
+        iter->second->RemoveAllObjectsInRemoveList();
+    }
 }
 
 bool MapManager::ExistMapAndVMap(uint32 mapid, float x, float y)
@@ -247,7 +271,9 @@ bool MapManager::IsValidMAP(uint32 mapid)
 void MapManager::UnloadAll()
 {
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        { iter->second->UnloadAll(true); }
+    {
+        iter->second->UnloadAll(true);
+    }
 
     while (!i_maps.empty())
     {
@@ -258,7 +284,9 @@ void MapManager::UnloadAll()
     TerrainManager::Instance().UnloadAll();
 
     if (m_updater.activated())
-      { m_updater.deactivate(); }
+    {
+        m_updater.deactivate();
+    }
 }
 
 void MapManager::InitMaxInstanceId()
@@ -281,7 +309,10 @@ uint32 MapManager::GetNumInstances()
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
     {
         Map* map = itr->second;
-        if (!map->IsDungeon()) { continue; }
+        if (!map->IsDungeon())
+        {
+            continue;
+        }
         ret += 1;
     }
     return ret;
@@ -295,7 +326,10 @@ uint32 MapManager::GetNumPlayersInInstances()
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
     {
         Map* map = itr->second;
-        if (!map->IsDungeon()) { continue; }
+        if (!map->IsDungeon())
+        {
+            continue;
+        }
         ret += map->GetPlayers().getSize();
     }
     return ret;
@@ -325,7 +359,9 @@ Map* MapManager::CreateInstance(uint32 id, Player* player)
         map = FindMap(id, NewInstanceId);
         // it is possible that the save exists but the map doesn't
         if (!map)
-            { pNewMap = CreateDungeonMap(id, NewInstanceId, pSave->GetDifficulty(), pSave); }
+        {
+            pNewMap = CreateDungeonMap(id, NewInstanceId, pSave->GetDifficulty(), pSave);
+        }
     }
     else
     {

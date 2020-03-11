@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,13 +49,16 @@ DatabaseMysql::DatabaseMysql()
     if (db_count++ == 0)
     {
         // Mysql Library Init
-        mysql_library_init(-1, NULL, NULL);
-
+        if(mysql_library_init(-1, NULL, NULL))
+        {
+            sLog.outError("Could not initialize MySQL client library\n");
+            ACE_OS::exit();
+        }
         if (!mysql_thread_safe())
         {
             sLog.outError("FATAL ERROR: Used MySQL library isn't thread-safe.");
             Log::WaitBeforeContinueIfNeed();
-            exit(1);
+            ACE_OS::exit();
         }
     }
 }
@@ -66,7 +69,9 @@ DatabaseMysql::~DatabaseMysql()
 
     // Free Mysql library pointers for last ~DB
     if (--db_count == 0)
-        { mysql_library_end(); }
+    {
+        mysql_library_end();
+    }
 }
 
 SqlConnection* DatabaseMysql::CreateConnection()
@@ -100,15 +105,25 @@ bool MySQLConnection::Initialize(const char* infoString)
     iter = tokens.begin();
 
     if (iter != tokens.end())
-        { host = *iter++; }
+    {
+        host = *iter++;
+    }
     if (iter != tokens.end())
-        { port_or_socket = *iter++; }
+    {
+        port_or_socket = *iter++;
+    }
     if (iter != tokens.end())
-        { user = *iter++; }
+    {
+        user = *iter++;
+    }
     if (iter != tokens.end())
-        { password = *iter++; }
+    {
+        password = *iter++;
+    }
     if (iter != tokens.end())
-        { database = *iter++; }
+    {
+        database = *iter++;
+    }
 
     mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
     mysql_options(mysqlInit, MYSQL_OPT_RECONNECT, "1");
@@ -168,9 +183,13 @@ bool MySQLConnection::Initialize(const char* infoString)
     // LEAVE 'AUTOCOMMIT' MODE ALWAYS ENABLED!!!
     // W/O IT EVEN 'SELECT' QUERIES WOULD REQUIRE TO BE WRAPPED INTO 'START TRANSACTION'<>'COMMIT' CLAUSES!!!
     if (!mysql_autocommit(mMysql, 1))
-        { DETAIL_LOG("AUTOCOMMIT SUCCESSFULLY SET TO 1"); }
+    {
+        DETAIL_LOG("AUTOCOMMIT SUCCESSFULLY SET TO 1");
+    }
     else
-        { DETAIL_LOG("AUTOCOMMIT NOT SET TO 1"); }
+    {
+        DETAIL_LOG("AUTOCOMMIT NOT SET TO 1");
+    }
     /*-------------------------------------*/
 
     // set connection properties to UTF8 to properly handle locales for different
@@ -184,7 +203,9 @@ bool MySQLConnection::Initialize(const char* infoString)
 bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD** pFields, uint64* pRowCount, uint32* pFieldCount)
 {
     if (!mMysql)
-        { return 0; }
+    {
+        return 0;
+    }
 
     uint32 _s = WorldTimer::getMSTime();
 
@@ -204,7 +225,9 @@ bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD**
     *pFieldCount = mysql_field_count(mMysql);
 
     if (!*pResult)
-        { return false; }
+    {
+        return false;
+    }
 
     if (!*pRowCount)
     {
@@ -224,7 +247,9 @@ QueryResult* MySQLConnection::Query(const char* sql)
     uint32 fieldCount = 0;
 
     if (!_Query(sql, &result, &fields, &rowCount, &fieldCount))
-        { return NULL; }
+    {
+        return NULL;
+    }
 
     QueryResultMysql* queryResult = new QueryResultMysql(result, fields, rowCount, fieldCount);
 
@@ -240,11 +265,15 @@ QueryNamedResult* MySQLConnection::QueryNamed(const char* sql)
     uint32 fieldCount = 0;
 
     if (!_Query(sql, &result, &fields, &rowCount, &fieldCount))
-        { return NULL; }
+    {
+        return NULL;
+    }
 
     QueryFieldNames names(fieldCount);
     for (uint32 i = 0; i < fieldCount; ++i)
-        { names[i] = fields[i].name; }
+    {
+        names[i] = fields[i].name;
+    }
 
     QueryResultMysql* queryResult = new QueryResultMysql(result, fields, rowCount, fieldCount);
 
@@ -255,7 +284,9 @@ QueryNamedResult* MySQLConnection::QueryNamed(const char* sql)
 bool MySQLConnection::Execute(const char* sql)
 {
     if (!mMysql)
-        { return false; }
+    {
+        return false;
+    }
 
     {
         uint32 _s = WorldTimer::getMSTime();
@@ -309,7 +340,9 @@ bool MySQLConnection::RollbackTransaction()
 unsigned long MySQLConnection::escape_string(char* to, const char* from, unsigned long length)
 {
     if (!mMysql || !to || !from || !length)
-        { return 0; }
+    {
+        return 0;
+    }
 
     return(mysql_real_escape_string(mMysql, to, from, length));
 }
@@ -334,7 +367,9 @@ MySqlPreparedStatement::~MySqlPreparedStatement()
 bool MySqlPreparedStatement::prepare()
 {
     if (isPrepared())
-        { return true; }
+    {
+        return true;
+    }
 
     // remove old binds
     RemoveBinds();
@@ -400,7 +435,9 @@ void MySqlPreparedStatement::bind(const SqlStmtParameters& holder)
 
     // finalize adding params
     if (!m_pInputArgs)
-        { return; }
+    {
+        return;
+    }
 
     // verify if we bound all needed input parameters
     if (m_nParams != holder.boundParams())
@@ -434,7 +471,7 @@ void MySqlPreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldDat
 
     MYSQL_BIND& pData = m_pInputArgs[nIndex];
 
-    bool bUnsigned = false;
+    bool bUnsigned = 0;
     enum_field_types dataType = ToMySQLType(data, bUnsigned);
 
     // setup MYSQL_BIND structure
@@ -448,7 +485,9 @@ void MySqlPreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldDat
 void MySqlPreparedStatement::RemoveBinds()
 {
     if (!m_stmt)
-        { return; }
+    {
+        return;
+    }
 
     delete[] m_pInputArgs;
     delete[] m_pResult;
@@ -467,7 +506,9 @@ void MySqlPreparedStatement::RemoveBinds()
 bool MySqlPreparedStatement::execute()
 {
     if (!isPrepared())
-        { return false; }
+    {
+        return false;
+    }
 
     if (mysql_stmt_execute(m_stmt))
     {
@@ -481,22 +522,22 @@ bool MySqlPreparedStatement::execute()
 
 enum_field_types MySqlPreparedStatement::ToMySQLType(const SqlStmtFieldData& data, bool& bUnsigned)
 {
-    bUnsigned = false;
+    bUnsigned = 0;
     enum_field_types dataType = MYSQL_TYPE_NULL;
 
     switch (data.type())
     {
         case FIELD_NONE:    dataType = MYSQL_TYPE_NULL;                     break;
             // MySQL does not support MYSQL_TYPE_BIT as input type
-        case FIELD_BOOL:    // dataType = MYSQL_TYPE_BIT;      bUnsigned = true;  break;
-        case FIELD_UI8:     dataType = MYSQL_TYPE_TINY;     bUnsigned = true;  break;
+        case FIELD_BOOL:    // dataType = MYSQL_TYPE_BIT;      bUnsigned = 1;  break;
+        case FIELD_UI8:     dataType = MYSQL_TYPE_TINY;     bUnsigned = 1;  break;
         case FIELD_I8:      dataType = MYSQL_TYPE_TINY;                     break;
         case FIELD_I16:     dataType = MYSQL_TYPE_SHORT;                    break;
-        case FIELD_UI16:    dataType = MYSQL_TYPE_SHORT;    bUnsigned = true;  break;
+        case FIELD_UI16:    dataType = MYSQL_TYPE_SHORT;    bUnsigned = 1;  break;
         case FIELD_I32:     dataType = MYSQL_TYPE_LONG;                     break;
-        case FIELD_UI32:    dataType = MYSQL_TYPE_LONG;     bUnsigned = true;  break;
+        case FIELD_UI32:    dataType = MYSQL_TYPE_LONG;     bUnsigned = 1;  break;
         case FIELD_I64:     dataType = MYSQL_TYPE_LONGLONG;                 break;
-        case FIELD_UI64:    dataType = MYSQL_TYPE_LONGLONG; bUnsigned = true;  break;
+        case FIELD_UI64:    dataType = MYSQL_TYPE_LONGLONG; bUnsigned = 1;  break;
         case FIELD_FLOAT:   dataType = MYSQL_TYPE_FLOAT;                    break;
         case FIELD_DOUBLE:  dataType = MYSQL_TYPE_DOUBLE;                   break;
         case FIELD_STRING:  dataType = MYSQL_TYPE_STRING;                   break;

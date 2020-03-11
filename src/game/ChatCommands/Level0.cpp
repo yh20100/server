@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,9 @@ bool ChatHandler::HandleHelpCommand(char* args)
     else
     {
         if (!ShowHelpForCommand(getCommandTable(), args))
-            { SendSysMessage(LANG_NO_CMD); }
+        {
+            SendSysMessage(LANG_NO_CMD);
+        }
     }
 
     return true;
@@ -62,7 +64,9 @@ bool ChatHandler::HandleAccountCommand(char* args)
 {
     // let show subcommands at unexpected data in args
     if (*args)
-        { return false; }
+    {
+        return false;
+    }
 
     AccountTypes gmlevel = GetAccessLevel();
     PSendSysMessage(LANG_ACCOUNT_LEVEL, uint32(gmlevel));
@@ -108,12 +112,18 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     {
         char const* ver = sScriptMgr.GetScriptLibraryVersion();
         if (ver && *ver)
-            { PSendSysMessage(LANG_USING_SCRIPT_LIB, ver); }
+        {
+            PSendSysMessage(LANG_USING_SCRIPT_LIB, ver);
+        }
         else
-            { SendSysMessage(LANG_USING_SCRIPT_LIB_UNKNOWN); }
+        {
+            SendSysMessage(LANG_USING_SCRIPT_LIB_UNKNOWN);
+        }
     }
     else
-        { SendSysMessage(LANG_USING_SCRIPT_LIB_NONE); }
+    {
+        SendSysMessage(LANG_USING_SCRIPT_LIB_NONE);
+    }
 
     PSendSysMessage(LANG_USING_WORLD_DB, sWorld.GetDBVersion());
     PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
@@ -161,7 +171,9 @@ bool ChatHandler::HandleSaveCommand(char* /*args*/)
     // save or plan save after 20 sec (logout delay) if current next save time more this value and _not_ output any messages to prevent cheat planning
     uint32 save_interval = sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE);
     if (save_interval == 0 || (save_interval > 20 * IN_MILLISECONDS && player->GetSaveTimer() <= save_interval - 20 * IN_MILLISECONDS))
-        { player->SaveToDB(); }
+    {
+        player->SaveToDB();
+    }
 
     return true;
 }
@@ -169,19 +181,15 @@ bool ChatHandler::HandleSaveCommand(char* /*args*/)
 bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
 {
     std::list< std::pair<std::string, bool> > names;
-
+    sObjectAccessor.DoForAllPlayers([&names, this](Player *player)
     {
-        ACE_READ_GUARD_RETURN(HashMapHolder<Player>::LockType, g, HashMapHolder<Player>::GetLock(), true)
-        HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
-        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+        AccountTypes security = player->GetSession()->GetSecurity();
+        if ((player->isGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
+            (!m_session || player->IsVisibleGloballyFor(m_session->GetPlayer())))
         {
-            Player* player = itr->second;
-            AccountTypes security = player->GetSession()->GetSecurity();
-            if ((player->isGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
-                (!m_session || player->IsVisibleGloballyFor(m_session->GetPlayer())))
-                { names.push_back(std::make_pair<std::string, bool>(GetNameLink(player), player->isAcceptWhispers())); }
+            names.push_back(std::make_pair<std::string, bool>(GetNameLink(player), player->isAcceptWhispers()));
         }
-    }
+    });
 
     if (!names.empty())
     {
@@ -190,10 +198,14 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
         char const* accepts = GetMangosString(LANG_GM_ACCEPTS_WHISPER);
         char const* not_accept = GetMangosString(LANG_GM_NO_WHISPER);
         for (std::list<std::pair< std::string, bool> >::const_iterator iter = names.begin(); iter != names.end(); ++iter)
-            { PSendSysMessage("%s - %s", iter->first.c_str(), iter->second ? accepts : not_accept); }
+        {
+            PSendSysMessage("%s - %s", iter->first.c_str(), iter->second ? accepts : not_accept);
+        }
     }
     else
-        { SendSysMessage(LANG_GMS_NOT_LOGGED); }
+    {
+        SendSysMessage(LANG_GMS_NOT_LOGGED);
+    }
 
     return true;
 }
@@ -214,7 +226,9 @@ bool ChatHandler::HandleAccountPasswordCommand(char* args)
     char* new_pass_c = ExtractQuotedOrLiteralArg(&args);
 
     if (!old_pass || !new_pass || !new_pass_c)
-        { return false; }
+    {
+        return false;
+    }
 
     std::string password_old = old_pass;
     std::string password_new = new_pass;

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -236,7 +236,9 @@ inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
 {
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
         if (mask & (1 << i))
-            { return SpellSchools(i); }
+        {
+            return SpellSchools(i);
+        }
 
     return SPELL_SCHOOL_NORMAL;
 }
@@ -2787,7 +2789,7 @@ enum GMTicketStatus
  * string for this in the config file is LogWhispers, the config enum is
  * \ref eConfigUInt32Values::CONFIG_UINT32_LOG_WHISPERS and the default value is 1, ie: we only
  * log whispers related to tickets.
- * 
+ *
  * The database table that everything is logged to is character.character_whispers
  * \see Player::LogWhisper
  */

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,9 @@ void OutdoorPvPNA::FillInitialWorldStates(WorldPacket& data, uint32& count)
 
         // map states
         for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
+        {
             FillInitialWorldState(data, count, m_roostWorldState[i], WORLD_STATE_ADD);
+        }
     }
 
     FillInitialWorldState(data, count, m_zoneMapState, WORLD_STATE_ADD);
@@ -65,7 +67,9 @@ void OutdoorPvPNA::SendRemoveWorldStates(Player* player)
     player->SendUpdateWorldState(m_zoneMapState, WORLD_STATE_REMOVE);
 
     for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
+    {
         player->SendUpdateWorldState(m_roostWorldState[i], WORLD_STATE_REMOVE);
+    }
 }
 
 void OutdoorPvPNA::HandlePlayerEnterZone(Player* player, bool isMainZone)
@@ -138,7 +142,9 @@ void OutdoorPvPNA::HandleCreatureCreate(Creature* creature)
         case NPC_ALLIANCE_HANAANI_GUARD:
             // prevent updating guard counter on owner take over
             if (m_guardsLeft == MAX_NA_GUARDS)
+            {
                 return;
+            }
 
             if (m_guardsLeft == 0)
             {
@@ -159,7 +165,9 @@ void OutdoorPvPNA::HandleCreatureCreate(Creature* creature)
 void OutdoorPvPNA::HandleCreatureDeath(Creature* creature)
 {
     if (creature->GetEntry() != NPC_HORDE_HALAANI_GUARD && creature->GetEntry() != NPC_ALLIANCE_HANAANI_GUARD)
+    {
         return;
+    }
 
     // get the location of the dead guard for future respawn
     float x, y, z, o;
@@ -295,7 +303,9 @@ void OutdoorPvPNA::UpdateWorldState(uint32 value)
 void OutdoorPvPNA::UpdateWyvernsWorldState(uint32 value)
 {
     for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
+    {
         SendUpdateWorldState(m_roostWorldState[i], value);
+    }
 }
 
 // process the capture events
@@ -303,7 +313,9 @@ bool OutdoorPvPNA::HandleEvent(uint32 eventId, GameObject* go)
 {
     // If we are not using the Halaa banner return
     if (go->GetEntry() != GO_HALAA_BANNER)
+    {
         return false;
+    }
 
     bool eventHandled = true;
 

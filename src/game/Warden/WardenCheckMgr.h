@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,6 +50,7 @@ struct WardenCheck
 
 struct WardenCheckResult
 {
+    uint16 Id;
     BigNumber Result;                                       // MEM_CHECK
 };
 
@@ -66,24 +67,22 @@ class WardenCheckMgr
             return &instance;
         }
 
-        // We have a linear key without any gaps, so we use vector for fast access
-        typedef std::vector<WardenCheck*> CheckContainer;
-        typedef std::map<uint32, WardenCheckResult*> CheckResultContainer;
-
-        WardenCheck* GetWardenDataById(uint16 Id);
-        WardenCheckResult* GetWardenResultById(uint16 Id);
-
-        std::vector<uint16> MemChecksIdPool;
-        std::vector<uint16> OtherChecksIdPool;
+        WardenCheck* GetWardenDataById(uint16 /*build*/, uint16 /*id*/);
+        WardenCheckResult* GetWardenResultById(uint16 /*build*/, uint16 /*id*/);
+        void GetWardenCheckIds(bool isMemCheck /* true = MEM */, uint16 build, std::list<uint16>& list);
 
         void LoadWardenChecks();
         void LoadWardenOverrides();
 
-        ACE_RW_Mutex _checkStoreLock;
-
     private:
-        CheckContainer CheckStore;
-        CheckResultContainer CheckResultStore;
+        typedef ACE_RW_Thread_Mutex LOCK;
+        typedef std::multimap< uint16, WardenCheck* > CheckMap;
+        typedef std::multimap< uint16, WardenCheckResult* > CheckResultMap;
+
+        LOCK           m_lock;
+        CheckMap       CheckStore;
+        CheckResultMap CheckResultStore;
+
 };
 
 #define sWardenCheckMgr WardenCheckMgr::instance()

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,9 @@ OutdoorPvPMgr::OutdoorPvPMgr()
 OutdoorPvPMgr::~OutdoorPvPMgr()
 {
     for (uint8 i = 0; i < MAX_OPVP_ID; ++i)
-        { delete m_scripts[i]; }
+    {
+        delete m_scripts[i];
+    }
 }
 
 #define LOAD_OPVP_ZONE(a)                                           \
@@ -134,10 +136,19 @@ OutdoorPvP* OutdoorPvPMgr::GetScriptOfAffectedZone(uint32 zoneId)
  */
 void OutdoorPvPMgr::HandlePlayerEnterZone(Player* player, uint32 zoneId)
 {
-    if (OutdoorPvP* script = GetScript(zoneId))
-        { script->HandlePlayerEnterZone(player, true); }
-    else if (OutdoorPvP* script = GetScriptOfAffectedZone(zoneId))
-        { script->HandlePlayerEnterZone(player, false); }
+    OutdoorPvP* script = GetScript(zoneId);
+    if (script)
+    {
+        script->HandlePlayerEnterZone(player, true);
+    }
+    else
+    {
+        script = GetScriptOfAffectedZone(zoneId);
+        if (script)
+        {
+            script->HandlePlayerEnterZone(player, false);
+        }
+    }
 }
 
 /**
@@ -149,21 +160,34 @@ void OutdoorPvPMgr::HandlePlayerEnterZone(Player* player, uint32 zoneId)
 void OutdoorPvPMgr::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
 {
     // teleport: called once from Player::CleanupsBeforeDelete, once from Player::UpdateZone
-    if (OutdoorPvP* script = GetScript(zoneId))
-        { script->HandlePlayerLeaveZone(player, true); }
-    else if (OutdoorPvP* script = GetScriptOfAffectedZone(zoneId))
-        { script->HandlePlayerLeaveZone(player, false); }
+    OutdoorPvP* script = GetScript(zoneId);
+    if (script)
+    {
+        script->HandlePlayerLeaveZone(player, true);
+    }
+    else
+    {
+        script = GetScriptOfAffectedZone(zoneId);
+        if (script)
+        {
+            script->HandlePlayerLeaveZone(player, false);
+        }
+    }
 }
 
 void OutdoorPvPMgr::Update(uint32 diff)
 {
     m_updateTimer.Update(diff);
     if (!m_updateTimer.Passed())
-        { return; }
+    {
+        return;
+    }
 
     for (uint8 i = 0; i < MAX_OPVP_ID; ++i)
         if (m_scripts[i])
-            { m_scripts[i]->Update(m_updateTimer.GetCurrent()); }
+        {
+            m_scripts[i]->Update(m_updateTimer.GetCurrent());
+        }
 
     m_updateTimer.Reset();
 }
